@@ -84,10 +84,11 @@ public class MainActivity extends Activity {
                 + macAddr + '\n'
         );
 
+//		To just brute force execute (to be removed later)
         new PokeArubaTask().execute();
 
         ApplicableNetworkReceiver rec = new ApplicableNetworkReceiver();
-
+//		To detect change in network (triggers PokeArubaTask)
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         registerReceiver(rec, intentFilter);
