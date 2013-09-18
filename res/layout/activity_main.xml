@@ -1,20 +1,66 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
+    android:orientation="vertical"
+    android:padding="8dp">
 
-		<Button
-        android:layout_width="wrap_content"
+
+    <LinearLayout style="@style/InputField"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/menu_settings"
-    	android:onClick="gotoSettings" />
-		
-		<TextView
-        android:id="@+id/textUserSettings"
-        android:layout_width="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/InputHelp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/pref_user_name" />
+
+        <EditText
+            android:id="@+id/username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:hint="@string/pref_user_name_summary" />
+
+    </LinearLayout>
+
+    <LinearLayout style="@style/InputField"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding_medium"
-        tools:context=".MainActivity" />
-    
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/InputHelp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/pref_password" />
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:password="true"
+            android:singleLine="true" />
+
+    </LinearLayout>
+
+    <LinearLayout style="@style/InputField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/InputHelp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/connection_info" />
+
+        <TextView
+            android:id="@+id/info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
 </LinearLayout>
