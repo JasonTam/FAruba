@@ -45,6 +45,12 @@
 
     </LinearLayout>
 
+    <Button
+        android:id="@+id/update"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="@string/update"/>
+
     <LinearLayout style="@style/InputField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -52,9 +58,11 @@
 
         <TextView
             style="@style/InputHelp"
+            android:id="@+id/info_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/connection_info" />
+            android:text="@string/connection_info"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/info"

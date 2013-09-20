@@ -16,12 +16,14 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -39,7 +41,8 @@ public class MainActivity extends Activity {
     private static final String PREF_USERNAME = "com.example.faruba.preferences.username";
     private static final String PREF_PASSWORD = "com.example.faruba.preferences.password";
     private EditText mUsername, mPassword;
-    private TextView mConnectionInfo;
+    private TextView mConnectionInfo, mConnectionInfoTitle;
+    private Button mUpdate;
 
     @SuppressWarnings("static-access")
     @Override
@@ -50,6 +53,8 @@ public class MainActivity extends Activity {
         mUsername = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);
         mConnectionInfo = (TextView) findViewById(R.id.info);
+        mConnectionInfoTitle = (TextView) findViewById(R.id.info_title);
+        mUpdate = (Button) findViewById(R.id.update);
 
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(this);
@@ -62,6 +67,23 @@ public class MainActivity extends Activity {
         mPassword.setImeActionLabel(getResources().getString(R.string.save), KeyEvent.KEYCODE_ENTER);
         mPassword.setOnKeyListener(new SaveTextListener(this, PREF_PASSWORD));
 
+        mUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateInfo();
+            }
+        });
+
+        updateInfo();
+
+        ApplicableNetworkReceiver rec = new ApplicableNetworkReceiver();
+//		To detect change in network (triggers PokeArubaTask)
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        registerReceiver(rec, intentFilter);
+    }
+
+    private void updateInfo() {
         // WIFI STUFF
         WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -77,6 +99,8 @@ public class MainActivity extends Activity {
 
         String macAddr = wifiInfo.getMacAddress();
 
+        mConnectionInfoTitle.setVisibility(View.VISIBLE);
+
         mConnectionInfo.setText(ssid + '\n'
                 + supState + '\n'
                 + detailedSupState.toString() + '\n'
@@ -84,20 +108,8 @@ public class MainActivity extends Activity {
                 + macAddr + '\n'
         );
 
-//		To just brute force execute (to be removed later)
+        //		To just brute force execute (to be removed later)
         new PokeArubaTask().execute();
-
-        ApplicableNetworkReceiver rec = new ApplicableNetworkReceiver();
-//		To detect change in network (triggers PokeArubaTask)
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-        registerReceiver(rec, intentFilter);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return true;
     }
 
     private String postAuth() throws IOException {
@@ -180,6 +192,9 @@ public class MainActivity extends Activity {
 
             try {
                 return postAuth();
+            } catch (ClientProtocolException e) {
+                Log.w(TAG, "Already logged in.", e);
+                return getResources().getString(R.string.logged_in);
             } catch (IOException e) {
                 Log.w(TAG, "Error poking Aruba.", e);
                 return e.getMessage();

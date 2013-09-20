@@ -23,6 +23,8 @@
      
     <string name="pref_user_profile">User Profile</string>
     <string name="pref_update_setting">Update Settings</string>
-    
-    
+
+    <string name="logged_in">Already logged in.</string>
+    <string name="update">Update</string>
+
 </resources>
