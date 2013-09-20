@@ -1,5 +1,28 @@
 package com.example.faruba;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -14,34 +37,21 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends Activity {
+	private ScheduledExecutorService scheduleTaskExecutor;
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String BASE_URL = "https://securelogin.arubanetworks.com/cgi-bin/login";
     private static final String PREF_USERNAME = "com.example.faruba.preferences.username";
     private static final String PREF_PASSWORD = "com.example.faruba.preferences.password";
     private EditText mUsername, mPassword;
-    private TextView mConnectionInfo, mConnectionInfoTitle;
+    private TextView mServerResp, mConnectionInfo, mConnectionInfoTitle;
     private Button mUpdate;
 
     @SuppressWarnings("static-access")
@@ -53,6 +63,7 @@ public class MainActivity extends Activity {
         mUsername = (EditText) findViewById(R.id.username);
         mPassword = (EditText) findViewById(R.id.password);
         mConnectionInfo = (TextView) findViewById(R.id.info);
+        mServerResp = (TextView) findViewById(R.id.response);
         mConnectionInfoTitle = (TextView) findViewById(R.id.info_title);
         mUpdate = (Button) findViewById(R.id.update);
 
@@ -81,9 +92,57 @@ public class MainActivity extends Activity {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
         registerReceiver(rec, intentFilter);
+        
+//        Otherwise, need to poll for the issue
+        scheduleTaskExecutor= Executors.newScheduledThreadPool(5);
+
+        startPingSched();
     }
 
-    private void updateInfo() {
+	@SuppressLint("NewApi")
+	private void startPingSched() {
+		// TODO Auto-generated method stub
+		// This schedule a task to run every 10 minutes:
+	    scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+	      public void run() {
+	    	// POST auth request to Aruba
+	          new PokeArubaTask().execute();
+
+	        // Update UI
+	        runOnUiThread(new Runnable() {
+	          public void run() {
+	        	  updateInfo();
+	          }
+	        });
+	      }
+	    }, 0, 1, TimeUnit.MINUTES);
+		
+	}
+
+	@SuppressLint("ParserError")
+	private void pingOutside() {
+    	HttpURLConnection urlConnection = null;
+    	try {
+    		URL url = new URL("http://www.google.com");
+    		urlConnection = (HttpURLConnection) url.openConnection();
+    		InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+    		if (!url.getHost().equals(urlConnection.getURL().getHost())) {
+    			// Redirected to auth page
+    			Log.d("Network", "Aruba Detected");
+    			
+    		}
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+    			urlConnection.disconnect();
+		}
+	}
+
+	private void updateInfo() {
         // WIFI STUFF
         WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -104,11 +163,10 @@ public class MainActivity extends Activity {
         mConnectionInfo.setText(ssid + '\n'
                 + supState + '\n'
                 + detailedSupState.toString() + '\n'
-                + obIpAdd + '\n'
                 + macAddr + '\n'
         );
 
-        //		To just brute force execute (to be removed later)
+        // POST auth request to Aruba
         new PokeArubaTask().execute();
     }
 
@@ -204,7 +262,7 @@ public class MainActivity extends Activity {
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-            mConnectionInfo.setText(result);
+        	mServerResp.setText(result);
         }
     }
 }
