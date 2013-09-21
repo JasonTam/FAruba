@@ -81,6 +81,12 @@ public class MainActivity extends Activity {
         mUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                SharedPreferences sharedPrefs = PreferenceManager
+                        .getDefaultSharedPreferences(getApplicationContext());
+
+                sharedPrefs.edit().putString(PREF_USERNAME, mUsername.getText().toString()).commit();
+                sharedPrefs.edit().putString(PREF_PASSWORD, mPassword.getText().toString()).commit();
+
                 updateInfo();
             }
         });
