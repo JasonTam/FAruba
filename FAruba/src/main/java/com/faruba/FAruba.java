@@ -172,8 +172,10 @@ public class FAruba extends Activity {
                 + macAddr + '\n'
         );
 
-        // POST auth request to Aruba
-        new PokeArubaTask().execute();
+        if (ssid.toLowerCase().contains("cooper")) {
+            // POST auth request to Aruba
+            new PokeArubaTask().execute();
+        }
     }
 
     private String postAuth() throws IOException {
