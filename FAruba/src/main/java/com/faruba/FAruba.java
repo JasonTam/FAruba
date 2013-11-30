@@ -191,7 +191,7 @@ public class FAruba extends Activity {
         valPairs.add(new BasicNameValuePair("cmd", "login"));
         valPairs.add(new BasicNameValuePair("user", sharedPrefs.getString(PREF_USERNAME, "")));
         valPairs.add(new BasicNameValuePair("password", sharedPrefs.getString(PREF_PASSWORD, "")));
-        valPairs.add(new BasicNameValuePair("url", "www.google.com"));
+        valPairs.add(new BasicNameValuePair("url", "reddit.com"));
 
         httppost.setEntity(new UrlEncodedFormEntity(valPairs));
 
