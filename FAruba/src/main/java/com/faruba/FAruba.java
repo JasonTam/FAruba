@@ -1,6 +1,7 @@
 package com.faruba;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,11 +12,9 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Activity;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,13 +41,8 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.Socket;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
@@ -124,7 +118,7 @@ public class FAruba extends Activity {
         registerReceiver(rec, intentFilter);
 
 //        Otherwise, need to poll for the issue
-        scheduleTaskExecutor= Executors.newScheduledThreadPool(5);
+        scheduleTaskExecutor = Executors.newScheduledThreadPool(5);
 
         startPingSched();
     }
@@ -146,30 +140,6 @@ public class FAruba extends Activity {
                 });
             }
         }, 0, 1, TimeUnit.MINUTES);
-
-    }
-
-    @SuppressLint("ParserError")
-    private void pingOutside() {
-        HttpURLConnection urlConnection = null;
-        try {
-            URL url = new URL("http://www.google.com");
-            urlConnection = (HttpURLConnection) url.openConnection();
-            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-            if (!url.getHost().equals(urlConnection.getURL().getHost())) {
-                // Redirected to auth page
-                Log.d("Network", "Aruba Detected");
-
-            }
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            urlConnection.disconnect();
-        }
     }
 
     private void updateInfo() {
@@ -183,8 +153,6 @@ public class FAruba extends Activity {
         String supState = wifiInfo.getSupplicantState().toString();
 
         NetworkInfo.DetailedState detailedSupState = wifiInfo.getDetailedStateOf(wifiInfo.getSupplicantState());
-
-        boolean obIpAdd = detailedSupState.toString().equals("OBTAINING_IPADDR");
 
         String macAddr = wifiInfo.getMacAddress();
 
@@ -202,6 +170,9 @@ public class FAruba extends Activity {
         }
     }
 
+    /**
+     * Trust any certificate because they have not been updated.
+     */
     private class OpenSSLSocketFactory extends SSLSocketFactory {
 
         SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -221,7 +192,7 @@ public class FAruba extends Activity {
                 }
             };
 
-            sslContext.init(null, new TrustManager[] { tm }, null);
+            sslContext.init(null, new TrustManager[]{tm}, null);
         }
 
         @Override
