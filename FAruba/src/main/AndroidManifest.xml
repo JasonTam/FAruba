@@ -25,15 +25,21 @@
 				<action android:name="android.intent.action.MAIN" />
 
 				<category android:name="android.intent.category.LAUNCHER" />
-
-				<action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-				<action android:name="android.net.wifi.WIFI_STATE_CHANGE" />
-				<action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
-				<action android:name="android.net.wifi.supplicant.WIFI_STATE_CHANGE" />
-				<action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />
-				<action android:name="android.net.wifi.SCAN_RESULTS" />
 			</intent-filter>
 		</activity>
+
+		<receiver
+			android:name=".FArubaReceiver"
+			android:label="@string/app_name" >
+
+			<intent-filter android:priority="100" >
+				<action
+					android:name="android.net.wifi.STATE_CHANGE"
+					android:enabled="true" />
+			</intent-filter>
+		</receiver>
+
+		<service android:enabled="true" android:name=".FArubaService" />
 	</application>
 
 </manifest>
